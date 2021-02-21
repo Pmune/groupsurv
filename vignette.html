@@ -109,23 +109,23 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<div id="description" class="section level2">
-<h2>Description</h2>
-<p>The primary goal of Survival data analysis is to determine the distributional shape of the time to the occurrence of a certain event of interest and compare the survival experience among groups of the studied subjects. Depending of the area of application the event of interest can be marriage (in social-demographic applications), death (in clinical applications) or failure of system (in engineering applications).</p>
-<p>One frequent problem, though, is that not all studied subjects experience the event; their event time is missing or unknown. This problem is well known as &quot;censoring&quot;. There exists different censoring schemes, however the most encountered in real applications is the right censoring scheme in which censored subjects are those whose event time is missing because they experience the event after the study period ends (<span class="math inline">\(T&gt;C\)</span>), they are lost from the study, or other reasons such as death from another cause different from the studied one. The observed survival time <span class="math inline">\(t\)</span> is, therefore, either the true survival time (represented by the variable <span class="math inline">\(T\)</span>) or the censoring time (represented by the variable <span class="math inline">\(C\)</span>);i.e, <span class="math inline">\(t=min(T,C)\)</span>.</p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 <p>This package provides functions for grouping and summarizing (right censored) Survival data. It riquires Survival data which include the observed survival time <span class="math inline">\(t\)</span>, a censoring indicator <span class="math inline">\(d\)</span> (<span class="math inline">\(d=1\)</span> if event, <span class="math inline">\(d=0\)</span> if censored), and some relevant independent variables. The current version supports only categorical independe variables.</p>
 </div>
-<div id="grouped-survival-data" class="section level2">
-<h2>Grouped Survival data</h2>
-<p>Grouping Survival data is basically to descritize the survival time into a number of consecutive and non-overlaping time intervals to create grouped survival data from standard (right) censored survival data.</p>
-<p>In order to use the package with need to load it.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>This package is hosted on my Github. Therefore, to install it you need to install and load the <code>devtools</code> package, then install <code>groupsurv</code> using devetools.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#install.packages(&quot;devtools&quot;)</span>
+<span class="kw">library</span>(devtools)
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;Pmune/groupsurv&quot;</span>) <span class="co"># install groupsurv from github</span>
+<span class="kw">library</span>(groupsurv)</code></pre></div>
 </div>
-<div id="example" class="section level2">
-<h2>Example</h2>
-</div>
-<div id="data-simulation." class="section level1">
-<h1>Data simulation.</h1>
+<div id="example" class="section level1">
+<h1>Example</h1>
 <p>The implemented methods are illustrated on simulated data. The survival time is simulated from the exponetial distribution with rate <span class="math inline">\(1.2\)</span> and the censoring indicators from a bernoulli distribution with probability of success <span class="math inline">\(0.7\)</span>. This means that the censored observations are roughly <span class="math inline">\(30%\)</span>.</p>
+<div id="data-simulation." class="section level2">
+<h2>Data simulation.</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">500</span>)
 sample_size &lt;-<span class="st"> </span><span class="dv">500</span> <span class="co"># number of observations  </span>
 <span class="co"># simulate the censoring indicator</span>
@@ -227,8 +227,8 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <pre><code>#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 #&gt; 0.004453 0.220352 0.626315 0.923914 1.325540 7.536538</code></pre>
 </div>
-<div id="partioning-the-survival-time." class="section level1">
-<h1>Partioning the survival time.</h1>
+<div id="partioning-the-survival-time." class="section level2">
+<h2>Partioning the survival time.</h2>
 <p>To group the surival time, we need to partition the survival time into consecutive and disjoint time intervals. For the sake of example, let's partition the it based on the above quantiles; that is four intervals:</p>
 <ul>
 <li>interval <span class="math inline">\(1\)</span>: <span class="math inline">\([0.00, 0.31)\)</span>.</li>
@@ -238,11 +238,20 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 </ul>
 <p>To do this, we need to define a vector containing only the intervals limits where the last interval's upper limit is set to the observed highest survival time.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">intervals =<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.00</span>, <span class="fl">0.31</span>, <span class="fl">0.67</span>, <span class="fl">1.28</span>, <span class="kw">round</span>(<span class="kw">max</span>(simul_data<span class="op">$</span>time),<span class="dv">2</span>)) <span class="co"># create the time intervals</span></code></pre></div>
+</div>
+<div id="grouping-the-survival-time" class="section level2">
+<h2>Grouping the survival time</h2>
 <p>The next step is to call the function grouping. We need to pass to the function the column order of the survival time, censoring indicator and a vector of covariates to be included. In our case the survival time column is the first column, the second column contains the censoring indicator.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">grouped_data &lt;-<span class="st"> </span><span class="kw">grouping</span>(simul_data,intervals,<span class="dv">1</span>,<span class="dv">2</span>,<span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>))</code></pre></div>
 <p>The output is a data frame containing the exposure time and number of events for each time interval and covariate categories. The time intervals are displayed in the column labeled <code>Group</code>. See, the output below.</p>
+<table class="kable_wrapper">
+<caption>
+Grouped data
+</caption>
+<tbody>
+<tr>
+<td>
 <table>
-<caption>Grouped data</caption>
 <thead>
 <tr class="header">
 <th align="center">Exposure</th>
@@ -334,103 +343,25 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 <td align="center">1</td>
 </tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="center">Exposure</th>
+<th align="center">Events</th>
+<th align="center">Group</th>
+<th align="center">x1</th>
+<th align="center">x2</th>
+<th align="center">x3</th>
+</tr>
+</thead>
+<tbody>
 <tr class="odd">
-<td align="center">17.860547</td>
-<td align="center">13</td>
-<td align="center">2</td>
-<td align="center">0</td>
-<td align="center">1</td>
-<td align="center">0</td>
-</tr>
-<tr class="even">
-<td align="center">3.897414</td>
-<td align="center">2</td>
-<td align="center">2</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">0</td>
-</tr>
-<tr class="odd">
-<td align="center">14.454156</td>
-<td align="center">16</td>
-<td align="center">2</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-</tr>
-<tr class="even">
-<td align="center">6.413817</td>
-<td align="center">5</td>
-<td align="center">2</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">1</td>
-</tr>
-<tr class="odd">
-<td align="center">7.328450</td>
-<td align="center">6</td>
-<td align="center">2</td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">1</td>
-</tr>
-<tr class="even">
-<td align="center">6.055888</td>
-<td align="center">0</td>
-<td align="center">2</td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">0</td>
-</tr>
-<tr class="odd">
-<td align="center">26.992993</td>
-<td align="center">21</td>
-<td align="center">3</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">1</td>
-</tr>
-<tr class="even">
-<td align="center">29.815159</td>
-<td align="center">11</td>
-<td align="center">3</td>
-<td align="center">0</td>
-<td align="center">1</td>
-<td align="center">1</td>
-</tr>
-<tr class="odd">
-<td align="center">17.886714</td>
-<td align="center">13</td>
-<td align="center">3</td>
-<td align="center">0</td>
-<td align="center">1</td>
-<td align="center">0</td>
-</tr>
-<tr class="even">
-<td align="center">14.481961</td>
-<td align="center">11</td>
-<td align="center">3</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-</tr>
-<tr class="odd">
-<td align="center">4.286582</td>
-<td align="center">3</td>
-<td align="center">3</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">0</td>
-</tr>
-<tr class="even">
-<td align="center">5.804376</td>
-<td align="center">6</td>
-<td align="center">3</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">1</td>
-</tr>
-<tr class="odd">
+<td align="left">23</td>
 <td align="center">7.982687</td>
 <td align="center">5</td>
 <td align="center">3</td>
@@ -439,6 +370,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 </tr>
 <tr class="even">
+<td align="left">24</td>
 <td align="center">6.717625</td>
 <td align="center">8</td>
 <td align="center">3</td>
@@ -447,6 +379,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">0</td>
 </tr>
 <tr class="odd">
+<td align="left">25</td>
 <td align="center">25.740159</td>
 <td align="center">19</td>
 <td align="center">4</td>
@@ -455,6 +388,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 </tr>
 <tr class="even">
+<td align="left">26</td>
 <td align="center">31.463471</td>
 <td align="center">23</td>
 <td align="center">4</td>
@@ -463,6 +397,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 </tr>
 <tr class="odd">
+<td align="left">27</td>
 <td align="center">21.695436</td>
 <td align="center">16</td>
 <td align="center">4</td>
@@ -471,6 +406,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">0</td>
 </tr>
 <tr class="even">
+<td align="left">28</td>
 <td align="center">3.361787</td>
 <td align="center">3</td>
 <td align="center">4</td>
@@ -479,6 +415,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">0</td>
 </tr>
 <tr class="odd">
+<td align="left">29</td>
 <td align="center">3.799417</td>
 <td align="center">2</td>
 <td align="center">4</td>
@@ -487,6 +424,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 </tr>
 <tr class="even">
+<td align="left">30</td>
 <td align="center">10.472140</td>
 <td align="center">10</td>
 <td align="center">4</td>
@@ -495,6 +433,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">0</td>
 </tr>
 <tr class="odd">
+<td align="left">31</td>
 <td align="center">9.516448</td>
 <td align="center">8</td>
 <td align="center">4</td>
@@ -503,6 +442,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <td align="center">1</td>
 </tr>
 <tr class="even">
+<td align="left">32</td>
 <td align="center">6.748427</td>
 <td align="center">5</td>
 <td align="center">4</td>
@@ -512,6 +452,15 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 </tr>
 </tbody>
 </table>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?knitr<span class="op">::</span><span class="kw">kable</span>()
+<span class="co">#&gt; starting httpd help server ... done</span></code></pre></div>
+</div>
+<div id="summarizing-the-survival-time" class="section level2">
+<h2>Summarizing the survival time</h2>
 <p>We can also, summarize the grouped data using the function <code>summary.grouped</code>. This function requires the gouped data and the time intervals.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_summary &lt;-<span class="st"> </span><span class="kw">grouped_summary</span>(grouped_data,intervals)</code></pre></div>
 <table>
@@ -551,6 +500,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 
 
