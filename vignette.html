@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Parfait Munezero" />
+
+<meta name="date" content="2021-02-21" />
+
+<title>Grouping Survival time</title>
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Grouping Survival time</h1>
+<h4 class="author">Parfait Munezero</h4>
+<h4 class="date">2021-02-21</h4>
+
+
+
+<div id="description" class="section level2">
+<h2>Description</h2>
+<p>The primary goal of Survival data analysis is to determine the distributional shape of the time to the occurrence of a certain event of interest and compare the survival experience among groups of the studied subjects. Depending of the area of application the event of interest can be marriage (in social-demographic applications), death (in clinical applications) or failure of system (in engineering applications).</p>
+<p>One frequent problem, though, is that not all studied subjects experience the event; their event time is missing or unknown. This problem is well known as &quot;censoring&quot;. There exists different censoring schemes, however the most encountered in real applications is the right censoring scheme in which censored subjects are those whose event time is missing because they experience the event after the study period ends (<span class="math inline">\(T&gt;C\)</span>), they are lost from the study, or other reasons such as death from another cause different from the studied one. The observed survival time <span class="math inline">\(t\)</span> is, therefore, either the true survival time (represented by the variable <span class="math inline">\(T\)</span>) or the censoring time (represented by the variable <span class="math inline">\(C\)</span>);i.e, <span class="math inline">\(t=min(T,C)\)</span>.</p>
+<p>This package provides functions for grouping and summarizing (right censored) Survival data. It riquires Survival data which include the observed survival time <span class="math inline">\(t\)</span>, a censoring indicator <span class="math inline">\(d\)</span> (<span class="math inline">\(d=1\)</span> if event, <span class="math inline">\(d=0\)</span> if censored), and some relevant independent variables. The current version supports only categorical independe variables.</p>
+</div>
+<div id="grouped-survival-data" class="section level2">
+<h2>Grouped Survival data</h2>
+<p>Grouping Survival data is basically to descritize the survival time into a number of consecutive and non-overlaping time intervals to create grouped survival data from standard (right) censored survival data.</p>
+<p>In order to use the package with need to load it.</p>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+</div>
+<div id="data-simulation." class="section level1">
+<h1>Data simulation.</h1>
+<p>The implemented methods are illustrated on simulated data. The survival time is simulated from the exponetial distribution with rate <span class="math inline">\(1.2\)</span> and the censoring indicators from a bernoulli distribution with probability of success <span class="math inline">\(0.7\)</span>. This means that the censored observations are roughly <span class="math inline">\(30%\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">500</span>)
+sample_size &lt;-<span class="st"> </span><span class="dv">500</span> <span class="co"># number of observations  </span>
+<span class="co"># simulate the censoring indicator</span>
+status &lt;-<span class="st"> </span><span class="kw">rbinom</span>(sample_size, <span class="dv">1</span>, .<span class="dv">7</span>) <span class="co"># censoreed obs aprox 30%</span>
+<span class="co"># simulate some binary covariates</span>
+x1 &lt;-<span class="st"> </span><span class="kw">rbinom</span>(sample_size, <span class="dv">1</span>, .<span class="dv">2</span>)
+x2 &lt;-<span class="st"> </span><span class="kw">rbinom</span>(sample_size, <span class="dv">1</span>, .<span class="dv">5</span>)
+x3 &lt;-<span class="st"> </span><span class="kw">rbinom</span>(sample_size, <span class="dv">1</span>, .<span class="dv">6</span>)
+<span class="co"># simulate survival time from the exponential distribution</span>
+surv_time &lt;-<span class="st"> </span><span class="kw">rexp</span>(sample_size,<span class="fl">1.2</span>) 
+
+simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">time=</span>surv_time,<span class="dt">status=</span>status,<span class="dt">x1=</span>x1,<span class="dt">x2=</span>x2,<span class="dt">x3=</span>x3)</code></pre></div>
+<p>The simulated data looks as follows:</p>
+<table>
+<caption>Simulated data</caption>
+<thead>
+<tr class="header">
+<th align="center">time</th>
+<th align="center">status</th>
+<th align="center">x1</th>
+<th align="center">x2</th>
+<th align="center">x3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1.8797090</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">1.7228470</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0655386</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">1.0610717</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">1.8211557</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">0.1680146</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0825950</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">0.0313709</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0702909</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">0.2650521</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<p>and the simulated survival time summary is as follows:</p>
+<pre><code>#&gt;     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+#&gt; 0.004453 0.220352 0.626315 0.923914 1.325540 7.536538</code></pre>
+</div>
+<div id="partioning-the-survival-time." class="section level1">
+<h1>Partioning the survival time.</h1>
+<p>To group the surival time, we need to partition the survival time into consecutive and disjoint time intervals. For the sake of example, let's partition the it based on the above quantiles; that is four intervals:</p>
+<ul>
+<li>interval <span class="math inline">\(1\)</span>: <span class="math inline">\([0.00, 0.31)\)</span>.</li>
+<li>interval <span class="math inline">\(2\)</span>: <span class="math inline">\([0.31, 0.67)\)</span>.</li>
+<li>interval <span class="math inline">\(3\)</span>: <span class="math inline">\([0.67, 1.28)\)</span>.</li>
+<li>interval <span class="math inline">\(4\)</span>: <span class="math inline">\([1.28, \infty)\)</span>.</li>
+</ul>
+<p>To do this, we need to define a vector containing only the intervals limits where the last interval's upper limit is set to the observed highest survival time.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">intervals =<span class="st"> </span><span class="kw">c</span>(<span class="fl">0.00</span>, <span class="fl">0.31</span>, <span class="fl">0.67</span>, <span class="fl">1.28</span>, <span class="kw">round</span>(<span class="kw">max</span>(simul_data<span class="op">$</span>time),<span class="dv">2</span>)) <span class="co"># create the time intervals</span></code></pre></div>
+<p>The next step is to call the function grouping. We need to pass to the function the column order of the survival time, censoring indicator and a vector of covariates to be included. In our case the survival time column is the first column, the second column contains the censoring indicator.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">grouped_data &lt;-<span class="st"> </span><span class="kw">grouping</span>(simul_data,intervals,<span class="dv">1</span>,<span class="dv">2</span>,<span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>))</code></pre></div>
+<p>The output is a data frame containing the exposure time and number of events for each time interval and covariate categories. The time intervals are displayed in the column labeled <code>Group</code>. See, the output below.</p>
+<table>
+<caption>Grouped data</caption>
+<thead>
+<tr class="header">
+<th align="center">Exposure</th>
+<th align="center">Events</th>
+<th align="center">Group</th>
+<th align="center">x1</th>
+<th align="center">x2</th>
+<th align="center">x3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">30.407570</td>
+<td align="center">19</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">30.947746</td>
+<td align="center">28</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">8.127016</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">22.739246</td>
+<td align="center">20</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">19.803749</td>
+<td align="center">15</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">4.607239</td>
+<td align="center">6</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">7.061111</td>
+<td align="center">5</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">5.288858</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">25.920150</td>
+<td align="center">18</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">24.278574</td>
+<td align="center">18</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">17.860547</td>
+<td align="center">13</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">3.897414</td>
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">14.454156</td>
+<td align="center">16</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">6.413817</td>
+<td align="center">5</td>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">7.328450</td>
+<td align="center">6</td>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">6.055888</td>
+<td align="center">0</td>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">26.992993</td>
+<td align="center">21</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">29.815159</td>
+<td align="center">11</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">17.886714</td>
+<td align="center">13</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">14.481961</td>
+<td align="center">11</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">4.286582</td>
+<td align="center">3</td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">5.804376</td>
+<td align="center">6</td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">7.982687</td>
+<td align="center">5</td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">6.717625</td>
+<td align="center">8</td>
+<td align="center">3</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">25.740159</td>
+<td align="center">19</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">31.463471</td>
+<td align="center">23</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">21.695436</td>
+<td align="center">16</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">3.361787</td>
+<td align="center">3</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">3.799417</td>
+<td align="center">2</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">10.472140</td>
+<td align="center">10</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">9.516448</td>
+<td align="center">8</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">6.748427</td>
+<td align="center">5</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<p>We can also, summarize the grouped data using the function <code>summary.grouped</code>. This function requires the gouped data and the time intervals.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_summary &lt;-<span class="st"> </span><span class="kw">grouped_summary</span>(grouped_data,intervals)</code></pre></div>
+<table>
+<caption>Summary of the grouped data</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="center">Exposure</th>
+<th align="center">Events</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">[0,0.31)</td>
+<td align="center">128.9825</td>
+<td align="center">98</td>
+</tr>
+<tr class="even">
+<td align="left">[0.31,0.67)</td>
+<td align="center">106.2090</td>
+<td align="center">78</td>
+</tr>
+<tr class="odd">
+<td align="left">[0.67,1.28)</td>
+<td align="center">113.9681</td>
+<td align="center">78</td>
+</tr>
+<tr class="even">
+<td align="left">[1.28,7.54)</td>
+<td align="center">112.7973</td>
+<td align="center">86</td>
+</tr>
+<tr class="odd">
+<td align="left">Total</td>
+<td align="center">461.9569</td>
+<td align="center">340</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
