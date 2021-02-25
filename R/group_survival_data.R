@@ -6,38 +6,40 @@
 #'
 #' @param surv_data Raw data in the foarm of a data frame.
 #' @param time_intervals A vector of time points partitioning the survival time. They define the survival time groups.
-#' @param col_indexes A list of column indexes that specify the columns index  of the survival time,
-#'  censoring indicator, and covariates used.
-#' @return A data frame containing the grouped survival data.
+#' @param time_ind Column index of the survival time in the data.
+#' @param cens_ind Column index of the censoring indicator in the data.
+#' @param x_vec A vector of column indexes that specify covariates to be used.
+#' @return A data frame containing the grouped survival data. In addition to the selected covariates,
+#' the output data frame three columns: exposure (for the exposure times), events (for the number of events),
+#' and group (representing the survival time interval category).
 #' @export
 
-grouping<-function(survData,intervals,T_ind,C_ind,X_vec)
+group_surv_time<-function(surv_data,time_intervals,time_ind,cens_ind,X_vec)
 {
-  grouped<-c()
-  for(i in 2:length(intervals))
+  grouped_data<-c()
+  for(i in 2:length(time_intervals))
 
   {
-    Data.new<-IntervalData(survData,intervals[i-1],intervals[i],T_ind,C_ind)
-    L<-dim(Data.new)[1]
-    X.mat<-as.data.frame(unique(Data.new[,X_vec]))
-    for(j in 1:dim(X.mat)[1])
+    interval_data<-compute_interval_data(surv_data,time_intervals[i-1],time_intervals[i],time_ind,cens_ind, X_vec)
+    L<-dim(interval_data)[1]
+    X_mat<-as.data.frame(unique(interval_data[,X_vec]))
+    for(j in 1:dim(X_mat)[1])
     {
       # difference between a given variable combination with the whole dataset
-      Diff<-as.matrix(Data.new[,X_vec])==
-        matrix(rep(X.mat[j,],each=L),ncol=length(X.mat[j,]))
-
-      Diff<-ifelse(Diff==TRUE,1,0)
-      Exposure<-sum(Data.new[which(apply(Diff,1,prod)==1),T_ind])
-      Events<-sum(Data.new[which(apply(Diff,1,prod)==1),C_ind])
-      grouped<-rbind(grouped,cbind(Exposure=Exposure,Events=Events,Group=i-1,X.mat[j,]))
+      diff<-as.matrix(interval_data[,X_vec])==
+        matrix(rep(X_mat[j,],each=L),ncol=length(X_mat[j,]))
+      diff<-ifelse(diff==TRUE,1,0)
+      exposure<-sum(interval_data[which(apply(diff,1,prod)==1),"time"])
+      events<-sum(interval_data[which(apply(diff,1,prod)==1),"status"])
+      grouped_data<-rbind(grouped_data,cbind(exposure=exposure,events=events,group=i-1,X_mat[j,]))
     }
 
   }
 
-  colnames(grouped)<-c("Exposure","Events","Group",colnames(survData)[X_vec])
-  rownames(grouped) <- c()
+  colnames(grouped_data)<-c("Exposure","Events","Group",colnames(surv_data[X_vec]))
+  rownames(grouped_data) <- c()
 
-  return(as.data.frame(grouped))
+  return(as.data.frame(grouped_data))
 }
 
 
@@ -47,52 +49,52 @@ grouping<-function(survData,intervals,T_ind,C_ind,X_vec)
 #' @param lower_limit The lower limit of the time interval
 #' @param upper_limit The upper limit of the time interval
 #' @param surv_data The raw data in the foarm of a data frame.
-#' @param col_indexes A list of column indexes that specify the columns index  of the survival time,
-#'  censoring indicator, and covariates used.
+#' @param time_ind Column index of the survival time in the data.
+#' @param cens_ind Column index of the censoring indicator in the data.
+#' @param x_vec A vector of column indexes that specify covariates to be used.
 #' @return The interval-specific data in the foarm of a data frame.
 #' @export
 
-IntervalData<-function(survData,LowLim,UPLim,T_ind,C_ind)
+compute_interval_data<-function(surv_data,lower_limit,upper_limit,time_ind,cens_ind, x_vec)
 {
-  # filter individuals who experienced the event or were censored before the interval [LowLim,UPLim)
-  IntData<-survData[which(survData[,T_ind]>=LowLim),]
+  # filter individuals who experienced the event or were censored before the interval [lower_limit,upper_limit)
+  int_data<-surv_data[which(surv_data[,time_ind]>=lower_limit),]
   # compute the new survival time
-  SurvTime<-apply(cbind(IntData[,T_ind]-LowLim,rep((UPLim-LowLim),
-                                                   nrow(IntData))),1,min)
+  surv_time<-apply(cbind(int_data[,time_ind]-lower_limit,rep((upper_limit-lower_limit),
+                                                   nrow(int_data))),1,min)
   # compute the interval censoring index
   # as a reminder: an obs is censored if it survive beyond the interval or was censored within the interval.
   # if an obs is censored the index is given calue equal to 0, otherwise it is 1.
-  index<-IntData[,C_ind]*ifelse(IntData[,T_ind]<UPLim,1,0)
-  return(data.frame(Time=SurvTime,Status=index,IntData[,-c(T_ind,C_ind)]))
+  index<-int_data[,cens_ind]*ifelse(int_data[,time_ind]<upper_limit,1,0)
+  return(data.frame(time=surv_time,status=index,int_data[,x_vec]))
 }
 
 
 #' Compute a summary of the grouped data
 #' @param grouped.data A data frame containing the grouped data to be summarized.
-#' @param intervals A vector of time points partitioning the survival time. They define the survival time groups.
-#' @param col.indexes A vector of column indexes for which to display the summary.
+#' @param time_intervals A vector of time points partitioning the survival time. They define the survival time groups.
 #' @return The data summary.
 #' @export
 
-grouped_summary<-function(grouped.data,intervals,col.indexes=c(1,2))
+grouped_summary<-function(grouped_data,time_intervals)
 {
-  grp.names<-c()
-  total.sum<-c()
-  for (i in 1:(length(intervals)-1))
+  grp_names<-c()
+  total_sum<-c()
+  col_indexes <- c(1,2)
+  for (i in 1:(length(time_intervals)-1))
   {
 
-    grp.names<-cbind(grp.names,
-                     paste0("[",paste0(intervals[i]),
-                            paste0(",", paste0(intervals[i+1],")"))))
-    total.sum<-rbind(total.sum,apply(grouped.data[which(grouped.data$Group==i),
-                                                  col.indexes],2,sum))
+    grp_names<-cbind(grp_names,
+                     paste0("[",paste0(time_intervals[i]),
+                            paste0(",", paste0(time_intervals[i+1],")"))))
+    total_sum<-rbind(total_sum,apply(grouped_data[which(grouped_data$Group==i),
+                                                  col_indexes],2,sum))
 
   }
-  grand_totals <- c(Total=apply(total.sum,2,sum))
-  total.sum <- rbind(total.sum , grand_totals)
-  rownames(total.sum)<-c(grp.names, 'Total')
-  #print(c(Total=apply(total.sum,2,sum)))
-  return(total.sum)
+  grand_totals <- c(Total=apply(total_sum,2,sum))
+  total_sum <- rbind(total_sum , grand_totals)
+  rownames(total_sum)<-c(grp_names, 'Total')
+  return(total_sum)
 
 }
 

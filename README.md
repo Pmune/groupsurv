@@ -1,21 +1,40 @@
 # Grouped Survival data analysis
 
 
-The primary goal of Survival data analysis is to determine the distributional shape of the time to the occurrence of a certain event of interest 
-and compare the survival experience among groups of the studied subjects.
-Depending of the area of application the event of interest can be marriage (social-demographic applications),
-death (clinical  applications) or failure of system (engineering applications).
+---
+title: "Grouping Survival time"
+author: "Parfait Munezero"
+output: rmarkdown::html_vignette
+description: >
+  This is package provides functions for grouping and summarizing (right censored) Survival times. 
+fig_caption: yes
+vignette: >
+  \VignetteIndexEntry{Grouping Survival time}
+  \VignetteEngine{knitr::rmarkdown}
+  \VignetteEncoding{UTF-8}
+---
 
-One frequent problem, though, is that not all studied subjects experience the event; some will never experience 
-the event, others may experience it after the study period ends. This problem is well known as "censoring". 
-censored survival data include therefore, the observed survival time, a censorig indicator, and some relevant 
-independent variables.
-
-This is a package for descritizing the survival time into several time intervals to create grouped survival data 
-from standard (right) censored survival data. Also the package implements some models for grouped survival data. 
-
-Grouped survival data can be modelled using generalized linear models such the Poisson model which are currently supported by the package. 
-
-
+`groupsurv` package provides functions for grouping and summarizing Survival data. It riquires Survival data which include the observed survival time $t$, a censoring indicator $d$ ($d=1$ if event, $d=0$ if censored), and some relevant independent variables. The current version supports only categorical independe variables.
 
 
+## Installation.
+
+This package is hosted on my Github. Therefore, to install it you need to install and load the `devtools` package, then install `groupsurv` using devetools.
+
+```{r}
+#install.packages("devtools")
+library(devtools)
+devtools::install_github("Pmune/groupsurv") # install groupsurv from github
+library(groupsurv)
+```
+
+## Implemented functions.
+
+The key functions implemented in `groupsurv` are:
+ 
+ * `group_surv_time` : the main function for grouping survival time. Requires the                raw survival data, column indices of the survival time, censoring                  indicator, and covariate to be included in the grouped data.
+ 
+ * `grouped_summary`: provides a summary of the grouped data.
+ * `compute_interval_data`: computes the exposures and event status within a given time period (interval) for all observatios.
+ 
+ For more details see the vignette.
