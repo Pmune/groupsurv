@@ -1,6 +1,6 @@
 # Grouped Survival data analysis
 
-`groupsurv` package provides functions for grouping and summarizing Survival data. It requires Survival data which include the observed survival time $t$, a censoring indicator $d$ ($d=1$ if event, $d=0$ if censored), and some relevant independent variables. The current version supports only categorical independent variables.
+`groupsurv` package provides functions for grouping and summarizing Survival data. It requires Survival data which include the observed survival time, a censoring indicator(`1` if event, `0` if censored), and some relevant independent variables. The current version supports only categorical independent variables.
 
 
 ## Installation.
