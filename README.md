@@ -1,19 +1,5 @@
 # Grouped Survival data analysis
 
-
----
-title: "Grouping Survival time"
-author: "Parfait Munezero"
-output: rmarkdown::html_vignette
-description: >
-  This is package provides functions for grouping and summarizing (right censored) Survival times. 
-fig_caption: yes
-vignette: >
-  \VignetteIndexEntry{Grouping Survival time}
-  \VignetteEngine{knitr::rmarkdown}
-  \VignetteEncoding{UTF-8}
----
-
 `groupsurv` package provides functions for grouping and summarizing Survival data. It requires Survival data which include the observed survival time $t$, a censoring indicator $d$ ($d=1$ if event, $d=0$ if censored), and some relevant independent variables. The current version supports only categorical independent variables.
 
 
