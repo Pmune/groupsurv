@@ -12,7 +12,6 @@
 
 <meta name="author" content="Parfait Munezero" />
 
-<meta name="date" content="2021-02-25" />
 
 <title>Grouping Survival time</title>
 
@@ -105,32 +104,35 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Grouping Survival time</h1>
 <h4 class="author">Parfait Munezero</h4>
-<h4 class="date">2021-02-25</h4>
 
 
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>This package provides functions for grouping and summarizing Survival data. It riquires Survival data which include the observed survival time <span class="math inline">\(t\)</span>, a censoring indicator <span class="math inline">\(d\)</span> (<span class="math inline">\(d=1\)</span> if event, <span class="math inline">\(d=0\)</span> if censored), and some relevant independent variables. The current version supports only categorical independe variables.</p>
-<p>The key functions implemented in <code>groupsurv</code> are: * <code>group_surv_time</code> : the main function for grouping survival time. Requires the raw survival data, column indices of the survival time, censoring indicator, and covariate to be included in the grouped data.</p>
+<p>The aim of <code>groupsurv</code> is to compute the exposure time and the event status in some user-specified time intervals that partition the survival time. The exposure time in a given interval can be the length of the interval (if the event or censoring is occurs after the interval), or the difference between the observed survival time and the lower limit of the interval (if event or censoring occurs inside the interval). The event status in the interval is <span class="math inline">\(1\)</span> if the event occurs in the interval and is <span class="math inline">\(0\)</span> otherwise. If a set of independent variables is provided, the two quantities are computed for each variable's category.</p>
+<p><code>groupsurv</code> requires that the data include a column of the observed survival time the censoring indicator (<span class="math inline">\(1\)</span> if event, <span class="math inline">\(0\)</span> if censored), and some relevant independent variables. The current version supports only categorical independent variables.</p>
+<p>The key functions implemented in <code>groupsurv</code> are:</p>
 <ul>
-<li><code>grouped_summary</code>: provides a summary of the grouped data.</li>
-<li><code>compute_interval_data</code>: computes the exposures and event status within a given time period (interval) for all observatios.</li>
+<li><p><code>group_surv_time</code> : The main function for grouping survival time. It requires the raw survival data, column indices of the survival time, censoring indicator, and covariate to be included in the grouped data.</p></li>
+<li><p><code>grouped_summary</code>: Provides a summary of the grouped data.</p></li>
+<li><p><code>compute_interval_data</code>: Computes the exposures and event status within a given time period (interval) for all observations.</p></li>
 </ul>
 </div>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
-<p>This package is hosted on my Github. Therefore, to install it you need to install and load the <code>devtools</code> package, then install <code>groupsurv</code> using devetools.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#install.packages(&quot;devtools&quot;)</span>
-<span class="co">#library(devtools)</span>
-<span class="co">#devtools::install_github(&quot;Pmune/groupsurv&quot;) # install groupsurv from github</span>
+<p><code>groupsurv</code> is hosted on Github; therefore, to install it you need to install and load the <code>devtools</code> package. Then install <code>groupsurv</code> using devetools.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># uncomment if you don't have devtools installed</span>
+
+<span class="co">#install.packages(&quot;devtools&quot;)</span>
+<span class="kw">library</span>(devtools)
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;Pmune/groupsurv&quot;</span>) <span class="co"># install groupsurv from github</span>
 <span class="kw">library</span>(groupsurv)</code></pre></div>
 </div>
 <div id="example" class="section level1">
 <h1>Example</h1>
-<p>The implemented methods are illustrated on simulated data. The survival time is simulated from the exponetial distribution with rate <span class="math inline">\(1.2\)</span> and the censoring indicators from a bernoulli distribution with probability of success <span class="math inline">\(0.7\)</span>. This means that the censored observations are roughly <span class="math inline">\(30%\)</span>.</p>
 <div id="data-simulation." class="section level2">
 <h2>Data simulation.</h2>
+<p>For illustrative purpose, let's simulate the survival time from the exponential distribution with rate <span class="math inline">\(1.2\)</span> and the censoring indicators from a Bernoulli distribution with probability of success <span class="math inline">\(0.7\)</span>. This means that the censored observations are roughly <span class="math inline">\(30%\)</span>. In addition to this, let's simulate some binary covariates.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">500</span>)
 sample_size &lt;-<span class="st"> </span><span class="dv">500</span> <span class="co"># number of observations  </span>
 <span class="co"># simulate the censoring indicator</span>
@@ -234,7 +236,7 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 </div>
 <div id="partioning-the-survival-time." class="section level2">
 <h2>Partioning the survival time.</h2>
-<p>To group the surival time, we need to partition the survival time into consecutive and disjoint time intervals. For the sake of example, let's partition the it based on the above quantiles; that is four intervals:</p>
+<p>To group the survival time, we need to partition the survival time into consecutive and disjoint time intervals. For the sake of example, let's partition the it based on the above quantiles; that is four intervals:</p>
 <ul>
 <li>interval <span class="math inline">\(1\)</span>: <span class="math inline">\([0.00, 0.31)\)</span>.</li>
 <li>interval <span class="math inline">\(2\)</span>: <span class="math inline">\([0.31, 0.67)\)</span>.</li>
@@ -247,20 +249,21 @@ simul_data &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<spa
 <div id="grouping-the-survival-time" class="section level2">
 <h2>Grouping the survival time</h2>
 <p>The next step is to call the function <code>group_surv_time</code>. We need to pass to the function either the column names or indices of the survival time, censoring indicator and all covariates to be included.</p>
-<p>In the following example we pass the column indices.In our case the survival time column is the first column, the second column contains the censoring indicator.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">grouped_data &lt;-<span class="st"> </span><span class="kw">group_surv_time</span>(<span class="dt">surv_data =</span> simul_data,
+<p>In the following example we pass the column indices. In our case the survival time column is the first column, the second column contains the censoring indicator, and we are going to include all independent variables <span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>, and <span class="math inline">\(x_3\)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#  passing column indices</span>
+grouped_data &lt;-<span class="st"> </span><span class="kw">group_surv_time</span>(<span class="dt">surv_data =</span> simul_data,
                                 <span class="dt">time_intervals =</span> intervals,
                                 <span class="dt">time_ind =</span> <span class="dv">1</span>,
                                 <span class="dt">cens_ind =</span> <span class="dv">2</span>,
-                                <span class="dt">X_vec =</span> <span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>))</code></pre></div>
-<p>One can use column names to pass arguments to <code>group_surv_time</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+                                <span class="dt">X_vec =</span> <span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>))
+
+<span class="co"># One can also use column names to pass arguments to the function.</span>
 grouped_data &lt;-<span class="st"> </span><span class="kw">group_surv_time</span>(<span class="dt">surv_data =</span> simul_data,
                                 <span class="dt">time_intervals =</span> intervals,
                                 <span class="dt">time_ind =</span> <span class="st">&quot;time&quot;</span>,
                                 <span class="dt">cens_ind =</span> <span class="st">&quot;status&quot;</span>,
                                 <span class="dt">X_vec =</span> <span class="kw">c</span>(<span class="st">&quot;x1&quot;</span>,<span class="st">&quot;x2&quot;</span>,<span class="st">&quot;x3&quot;</span>))</code></pre></div>
-<p>The output is a data frame containing the exposure time and number of events for each time interval and covariate categories. The time intervals are displayed in the column labeled <code>Group</code>. See, the output below.</p>
+<p>The output is a data frame containing the exposure time and number of events for each time interval and independent variable's categories. The time interval categories are displayed in the column labeled <code>group</code>. The categories <span class="math inline">\(1\)</span>, <span class="math inline">\(2\)</span>, <span class="math inline">\(3\)</span>, and <span class="math inline">\(4\)</span> refer to the first, second, third and forth interval of the defined survival time partition.</p>
 <table>
 <caption>Grouped data</caption>
 <thead>
@@ -535,7 +538,7 @@ grouped_data &lt;-<span class="st"> </span><span class="kw">group_surv_time</spa
 </div>
 <div id="summarizing-the-survival-time" class="section level2">
 <h2>Summarizing the survival time</h2>
-<p>We can, also, compute the overall summary of the grouped data using the function <code>grouped_summary</code>. This function requires the gouped data and the time intervals.</p>
+<p>We can, also, compute the overall summary of the grouped data using the function <code>grouped_summary</code>. This function requires the grouped data and the time intervals.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data_summary &lt;-<span class="st"> </span><span class="kw">grouped_summary</span>(grouped_data,intervals)</code></pre></div>
 <p>The output is a table of interval-specific total exposures and number of events as well as the overall total exposure and number of events.</p>
 <table>
