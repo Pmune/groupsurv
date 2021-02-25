@@ -23,4 +23,4 @@ The key functions implemented in `groupsurv` are:
  * `grouped_summary`: provides a summary of the grouped data.
  * `compute_interval_data`: computes the exposures and event status within a given time period (interval) for all observations.
  
- For more details see the vignette.
+ For more details see the `vignette`.
