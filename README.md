@@ -14,7 +14,7 @@ vignette: >
   \VignetteEncoding{UTF-8}
 ---
 
-`groupsurv` package provides functions for grouping and summarizing Survival data. It riquires Survival data which include the observed survival time $t$, a censoring indicator $d$ ($d=1$ if event, $d=0$ if censored), and some relevant independent variables. The current version supports only categorical independe variables.
+`groupsurv` package provides functions for grouping and summarizing Survival data. It requires Survival data which include the observed survival time $t$, a censoring indicator $d$ ($d=1$ if event, $d=0$ if censored), and some relevant independent variables. The current version supports only categorical independent variables.
 
 
 ## Installation.
@@ -35,6 +35,6 @@ The key functions implemented in `groupsurv` are:
  * `group_surv_time` : the main function for grouping survival time. Requires the                raw survival data, column indices of the survival time, censoring                  indicator, and covariate to be included in the grouped data.
  
  * `grouped_summary`: provides a summary of the grouped data.
- * `compute_interval_data`: computes the exposures and event status within a given time period (interval) for all observatios.
+ * `compute_interval_data`: computes the exposures and event status within a given time period (interval) for all observations.
  
  For more details see the vignette.
